@@ -7,7 +7,6 @@ import org.adalocatecar.servicos.ServicoAluguel;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -75,6 +74,7 @@ public class ServicoAluguelImpl  implements ServicoAluguel {
         long horasDaLocacaoTotal = Duration.between(aluguel.getDataInicio(), dataDevolucao).toHours();
 
         long diarias = horaDoAluguel / 24;
+        long acrescimoDeDiarias = 0;
 
         if (diarias <= 0) {
             diarias = 1;
@@ -82,9 +82,10 @@ public class ServicoAluguelImpl  implements ServicoAluguel {
 
         if (horasDaLocacaoTotal > horaDoAluguel) {
             diarias++;
+            acrescimoDeDiarias++;
         }
 
-        double valorTotal = calcularValorAluguel(aluguel, diarias);
+        List<Double> valorTotal = calcularValorAluguel(aluguel, diarias);
 
         System.out.println("Devolução de veículo:");
         System.out.println("Cliente: " + cliente.getNome());
@@ -92,12 +93,17 @@ public class ServicoAluguelImpl  implements ServicoAluguel {
         System.out.println("Data de início do aluguel: " + aluguel.getDataInicio());
         System.out.println("Data de devolução: " + dataDevolucao);
         System.out.println("Dias alugados: " + diarias);
+        System.out.println("Acrescimo de diárias por atraso no horário: " + acrescimoDeDiarias);
+        System.out.println("Desconto aplicado de: " + valorTotal.get(1) + "%");
+        System.out.println("Valor do desconto: " + valorTotal.get(2));
+        System.out.println("Valor do Aluguel sem desconto: " + valorTotal.get(3));
 
-        System.out.println("Valor total do aluguel: R$" + valorTotal);
+
+        System.out.println("Valor total do aluguel: R$" + valorTotal.get(0));
         alugueis.remove(aluguel);
     }
 
-    private double calcularValorAluguel(Aluguel aluguel, long diarias) {
+    private List<Double> calcularValorAluguel(Aluguel aluguel, long diarias) {
         double valorDiaria;
 
         switch (aluguel.getVeiculo().getTipo()) {
@@ -112,16 +118,21 @@ public class ServicoAluguelImpl  implements ServicoAluguel {
         }
 
         double valorTotal = valorDiaria * diarias;
+        double valorSemDesconto = valorTotal;
+        double porcentagemDesconto = 0;
+        double desconto= 0.0;
 
         if (aluguel.getCliente().getTipo() == TipoCliente.PESSOA_FISICA && diarias > 5) {
-            double desconto = valorTotal * 0.05;
+            desconto = valorTotal * 0.05;
+            porcentagemDesconto = 5;
             valorTotal -= desconto;
         } else if (aluguel.getCliente().getTipo() == TipoCliente.PESSOA_JURIDICA && diarias > 3) {
-            double desconto = valorTotal * 0.10;
+            desconto = valorTotal * 0.10;
+            porcentagemDesconto = 10;
             valorTotal -= desconto;
         }
 
-        return valorTotal;
+        return List.of(valorTotal, porcentagemDesconto, desconto, valorSemDesconto);
     }
 
     private Aluguel buscarAluguelAtivo(Cliente cliente, Veiculo veiculo) {
