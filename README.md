@@ -28,3 +28,7 @@ Tipo de Veículo	Valor por dia
 PEQUENO	R$ 100,00
 MEDIO	R$ 150,00
 SUV	R$ 200,00
+DIFICULDADES:
+- Estruturar o projeto;
+- Aplicar conceitos do Solid; Iniciei aplicando os conceitos, mas do meio pro final me perdi e decidi fazer uma versao simplificada, que exibisse minimamente o que foi solicitado.
+- Pensar nos algoritmos;
